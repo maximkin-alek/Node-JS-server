@@ -2,6 +2,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const PasswordValidator = require('password-validator');
 const User = require('../models/user');
+const UnauthorizedError = require('../errors/unauthorizedError');
+const BadRequestError = require('../errors/badRequestError');
+const ForbiddenError = require('../errors/forbiddenError');
+const ConflictError = require('../errors/conflictError');
+const NotFoundError = require('../errors/notFoundError');
 
 const passValid = new PasswordValidator();
 passValid
@@ -11,29 +16,29 @@ passValid
   .not()
   .spaces();
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Ошибка сервера' }));
+    .catch(next);
 };
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(() => { })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Такого пользователя не существует' });
+        throw new NotFoundError('Такого пользователя не существует');
       } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректный Id' });
-      } else { res.status(500).send({ message: 'Ошибка сервера' }); }
+        throw new BadRequestError('Некорректный Id');
+      } else { next(err); }
     });
 };
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
   if (!passValid.validate(password)) {
-    res.status(400).send({ message: 'Пароль должен содержать не менее 8 символов' });
+    throw new BadRequestError('Пароль должен содержать не менее 8 символов');
   } else {
     bcrypt.hash(password, 10)
       .then((hash) => {
@@ -49,17 +54,17 @@ module.exports.createUser = (req, res) => {
           }))
           .catch((err) => {
             if (err.name === 'ValidationError') {
-              res.status(400).send({ message: `Данные не валидны: ${err.message}` });
+              throw new BadRequestError('Данные не валидны');
             } else if (err.name === 'MongoError' && err.code === 11000) {
-              res.status(409).send({ message: 'Пользователь с таким email уже существует' });
-            } else { res.status(500).send({ message: 'Ошибка сервера' }); }
+              throw new ConflictError('Пользователь с таким email уже существует');
+            } else { next(err); }
           });
       })
-      .catch(() => { res.status(500).send({ message: 'Ошибка сервера' }); });
+      .catch((err) => { next(err); });
   }
 };
 
-module.exports.updateUserProfile = (req, res) => {
+module.exports.updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, {
     new: true,
@@ -71,21 +76,21 @@ module.exports.updateUserProfile = (req, res) => {
       if (user.id === req.user._id) {
         res.send({ data: user });
       } else {
-        res.status(403).send({ message: 'Недостаточно прав для этого действия' });
+        throw new ForbiddenError('Недостаточно прав для этого действия');
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: `Данные не валидны: ${err.message}` });
+        throw new BadRequestError('Данные не валидны');
       } else if (err.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Такого пользователя не существует' });
+        throw new NotFoundError('Такого пользователя не существует');
       } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректный Id' });
-      } else { res.status(500).send({ message: 'Ошибка сервера' }); }
+        throw new BadRequestError('Некорректный Id');
+      } else { next(err); }
     });
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, {
     new: true,
@@ -97,17 +102,17 @@ module.exports.updateUserAvatar = (req, res) => {
       if (user.id === req.user._id) {
         res.send({ data: user });
       } else {
-        res.status(403).send({ message: 'Недостаточно прав для этого действия' });
+        throw new ForbiddenError('Недостаточно прав для этого действия');
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: `Данные не валидны: ${err.message}` });
+        throw new BadRequestError('Данные не валидны');
       } else if (err.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Такого пользователя не существует' });
+        throw new NotFoundError('Такого пользователя не существует');
       } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректный Id' });
-      } else { res.status(500).send({ message: 'Ошибка сервера' }); }
+        throw new BadRequestError('Некорректный Id');
+      } else { next(err); }
     });
 };
 
@@ -118,9 +123,7 @@ module.exports.login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, 'a2ee16c5379c1de2f488b7dfff5544c20f8c0606893e7370f5d766d5e37659c9', { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
+    .catch(() => {
+      throw new UnauthorizedError('Необходима авторизация');
     });
 };
