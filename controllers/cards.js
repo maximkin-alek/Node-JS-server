@@ -22,7 +22,8 @@ module.exports.createCard = (req, res, next) => {
       } else {
         next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -44,7 +45,8 @@ module.exports.deleteCard = (req, res, next) => {
       } else if (err.name === 'CastError') {
         throw new BadRequestError('Некорректный Id');
       } else { next(err); }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -61,7 +63,8 @@ module.exports.likeCard = (req, res, next) => {
       } else if (err.name === 'CastError') {
         throw new BadRequestError('Некорректный Id');
       } else { next(err); }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -78,5 +81,6 @@ module.exports.dislikeCard = (req, res, next) => {
       } else if (err.name === 'CastError') {
         throw new BadRequestError('Некорректный Id');
       } else { next(err); }
-    });
+    })
+    .catch(next);
 };

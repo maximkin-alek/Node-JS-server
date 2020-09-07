@@ -31,7 +31,8 @@ module.exports.getUser = (req, res, next) => {
       } else if (err.name === 'CastError') {
         throw new BadRequestError('Некорректный Id');
       } else { next(err); }
-    });
+    })
+    .catch(next);
 };
 module.exports.createUser = (req, res, next) => {
   const {
@@ -58,9 +59,10 @@ module.exports.createUser = (req, res, next) => {
             } else if (err.name === 'MongoError' && err.code === 11000) {
               throw new ConflictError('Пользователь с таким email уже существует');
             } else { next(err); }
-          });
+          })
+          .catch(next);
       })
-      .catch((err) => { next(err); });
+      .catch((err) => next(err));
   }
 };
 
@@ -87,7 +89,8 @@ module.exports.updateUserProfile = (req, res, next) => {
       } else if (err.name === 'CastError') {
         throw new BadRequestError('Некорректный Id');
       } else { next(err); }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
@@ -113,10 +116,11 @@ module.exports.updateUserAvatar = (req, res, next) => {
       } else if (err.name === 'CastError') {
         throw new BadRequestError('Некорректный Id');
       } else { next(err); }
-    });
+    })
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUser(email, password)
     .then((user) => {
@@ -125,5 +129,6 @@ module.exports.login = (req, res) => {
     })
     .catch(() => {
       throw new UnauthorizedError('Необходима авторизация');
-    });
+    })
+    .catch(next);
 };
