@@ -1,7 +1,6 @@
 const cardsRouter = require('express').Router();
 const validator = require('validator');
 const { celebrate, Joi } = require('celebrate');
-// Joi.objectId = require('joi-objectid')(Joi);
 const BadRequestError = require('../errors/badRequestError');
 
 const {
@@ -22,8 +21,6 @@ cardsRouter.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().custom(urlValidator),
-    // owner: Joi.objectId(),
-    // likes: Joi.objectId(),
   }),
 }), createCard);
 
