@@ -8,6 +8,8 @@ const ForbiddenError = require('../errors/forbiddenError');
 const ConflictError = require('../errors/conflictError');
 const NotFoundError = require('../errors/notFoundError');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 const passValid = new PasswordValidator();
 passValid
   .is().min(8)
@@ -124,7 +126,7 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUser(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'a2ee16c5379c1de2f488b7dfff5544c20f8c0606893e7370f5d766d5e37659c9', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : '654gfqwg46q5q69qw4frf654', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch(() => {
