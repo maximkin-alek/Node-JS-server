@@ -7,6 +7,8 @@ const { cardsRouter, urlValidator } = require('./routes/cards');
 const userRouter = require('./routes/users');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/notFoundError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -26,11 +28,12 @@ app.use(limiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use(requestLogger);
+
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
-
   }),
 }), login);
 
@@ -41,7 +44,6 @@ app.post('/signup', celebrate({
     avatar: Joi.string().required().custom(urlValidator),
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
-
   }),
 }), createUser);
 
@@ -49,10 +51,13 @@ app.use(auth);
 
 app.use('/cards', cardsRouter);
 app.use('/users', userRouter);
+
 app.use((req, res) => {
-  res.status('404');
-  res.send({ message: 'Запрашиваемый ресурс не найден' });
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
+
+app.use(errorLogger);
+
 app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
