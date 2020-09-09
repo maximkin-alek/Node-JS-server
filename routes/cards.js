@@ -3,6 +3,8 @@ const validator = require('validator');
 const { celebrate, Joi } = require('celebrate');
 const BadRequestError = require('../errors/badRequestError');
 
+Joi.objectId = require('joi-objectid')(Joi);
+
 const {
   getCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
@@ -21,6 +23,8 @@ cardsRouter.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().custom(urlValidator),
+    owner: Joi.objectId(),
+    likes: Joi.objectId(),
   }),
 }), createCard);
 
