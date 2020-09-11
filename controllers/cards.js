@@ -18,7 +18,7 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Данные не валидны');
+        next(new BadRequestError(`Данные не валидны: ${err.message}`));
       } else {
         next(err);
       }

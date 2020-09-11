@@ -23,13 +23,25 @@ cardsRouter.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().custom(urlValidator),
-    owner: Joi.objectId(),
-    likes: Joi.objectId(),
   }),
 }), createCard);
 
-cardsRouter.delete('/:id', deleteCard);
-cardsRouter.put('/:id/likes', likeCard);
-cardsRouter.delete('/:id/likes', dislikeCard);
+cardsRouter.delete('/:id', celebrate({
+  params: Joi.object().keys({
+    id: Joi.objectId(),
+  }),
+}), deleteCard);
+
+cardsRouter.put('/:id/likes', celebrate({
+  params: Joi.object().keys({
+    id: Joi.objectId(),
+  }),
+}), likeCard);
+
+cardsRouter.delete('/:id/likes', celebrate({
+  params: Joi.object().keys({
+    id: Joi.objectId(),
+  }),
+}), dislikeCard);
 
 module.exports = { cardsRouter, urlValidator };

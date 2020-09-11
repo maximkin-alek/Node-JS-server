@@ -85,7 +85,7 @@ module.exports.updateUserProfile = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Данные не валидны');
+        throw new BadRequestError(`Данные не валидны: ${err.message}`);
       } else if (err.name === 'DocumentNotFoundError') {
         throw new NotFoundError('Такого пользователя не существует');
       } else if (err.name === 'CastError') {
@@ -112,7 +112,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Данные не валидны');
+        throw new BadRequestError(`Данные не валидны: ${err.message}`);
       } else if (err.name === 'DocumentNotFoundError') {
         throw new NotFoundError('Такого пользователя не существует');
       } else if (err.name === 'CastError') {
@@ -130,7 +130,7 @@ module.exports.login = (req, res, next) => {
       res.send({ token });
     })
     .catch(() => {
-      throw new UnauthorizedError('Необходима авторизация');
+      throw new UnauthorizedError('Неправильный логин или пароль');
     })
     .catch(next);
 };

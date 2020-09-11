@@ -59,7 +59,7 @@ app.use(auth);
 app.use('/cards', cardsRouter);
 app.use('/users', userRouter);
 
-app.use((req, res) => {
+app.use(() => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
 
@@ -75,6 +75,7 @@ app.use((err, req, res, next) => {
         ? 'На сервере произошла ошибка'
         : message,
     });
+  next();
 });
 
 app.listen(PORT, () => {
