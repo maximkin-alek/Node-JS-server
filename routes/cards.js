@@ -11,7 +11,7 @@ const {
 
 const urlValidator = (link) => {
   if (!validator.isURL(link)) {
-    throw new BadRequestError('Данные не валидны');
+    throw new BadRequestError('Ссылка не валидна');
   } else {
     return link;
   }
