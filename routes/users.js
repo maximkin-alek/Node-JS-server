@@ -1,6 +1,6 @@
 const userRouter = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-const { urlValidator } = require('./cards');
+const { urlValidator } = require('../validations/urlValidator');
 
 const {
   getUsers, getUser, updateUserProfile, updateUserAvatar,

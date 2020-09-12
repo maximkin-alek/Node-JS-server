@@ -1,21 +1,12 @@
 const cardsRouter = require('express').Router();
-const validator = require('validator');
 const { celebrate, Joi } = require('celebrate');
-const BadRequestError = require('../errors/badRequestError');
+const { urlValidator } = require('../validations/urlValidator');
 
 Joi.objectId = require('joi-objectid')(Joi);
 
 const {
   getCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
-
-const urlValidator = (link) => {
-  if (!validator.isURL(link)) {
-    throw new BadRequestError('Ссылка не валидна');
-  } else {
-    return link;
-  }
-};
 
 cardsRouter.get('/', getCards);
 
@@ -44,4 +35,4 @@ cardsRouter.delete('/:id/likes', celebrate({
   }),
 }), dislikeCard);
 
-module.exports = { cardsRouter, urlValidator };
+module.exports = { cardsRouter };
