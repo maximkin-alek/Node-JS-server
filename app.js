@@ -2,9 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const { celebrate, Joi, errors } = require('celebrate');
 const helmet = require('helmet');
-
+const { errors } = require('celebrate');
 const { cardsRouter } = require('./routes/cards');
 const userRouter = require('./routes/users');
 const { login, createUser } = require('./controllers/users');
@@ -12,7 +11,8 @@ const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/notFoundError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const limiter = require('./validations/rateLimiter');
-const { urlValidator } = require('./validations/urlValidator');
+const { signinValidator } = require('./validations/signinValidation');
+const { signupValidator } = require('./validations/signupValidation');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -36,22 +36,9 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
-  }),
-}), login);
+app.post('/signin', signinValidator, login);
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    about: Joi.string().required().min(2).max(30),
-    avatar: Joi.string().required().custom(urlValidator),
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
-  }),
-}), createUser);
+app.post('/signup', signupValidator, createUser);
 
 app.use(auth);
 
