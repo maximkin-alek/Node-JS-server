@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
+const helmet = require('helmet');
+
 const { cardsRouter } = require('./routes/cards');
 const userRouter = require('./routes/users');
 const { login, createUser } = require('./controllers/users');
@@ -21,6 +23,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 const { PORT = 3000 } = process.env;
 const app = express();
 
+app.use(helmet());
 app.use(limiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
