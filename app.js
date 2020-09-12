@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
+const cookieParser = require('cookie-parser');
 const { cardsRouter } = require('./routes/cards');
 const userRouter = require('./routes/users');
 const { login, createUser } = require('./controllers/users');
@@ -25,6 +26,7 @@ const app = express();
 
 app.use(helmet());
 app.use(limiter);
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 

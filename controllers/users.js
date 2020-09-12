@@ -127,7 +127,12 @@ module.exports.login = (req, res, next) => {
   return User.findUser(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : '654gfqwg46q5q69qw4frf654', { expiresIn: '7d' });
-      res.send({ token });
+      res.cookie('jwt', token, {
+        maxAge: 3600000,
+        httpOnly: true,
+        sameSite: true,
+      })
+        .end();
     })
     .catch(() => {
       throw new UnauthorizedError('Неправильный логин или пароль');
