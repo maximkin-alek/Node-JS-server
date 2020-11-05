@@ -24,9 +24,4 @@ Express, mongoose, celebrate, bcryptjs, express-rate-limit, jsonwebtoken, valida
 - Установить зависимости при помощи npm - `npm i`
 - Запустить в development режиме - `npm run start`
 
-## Ссылка на github pages:
-https://github.com/maximkin-alek/Sprint_15/tree/dev
 
-## Ссылка на сервер:
-http://alexmaxmesto.tk
-http://84.201.132.82
